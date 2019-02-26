@@ -7,6 +7,8 @@
   <script type="text/javascript" src="js/zip/jszip-utils.js"></script>
   <script type="text/javascript" src="js/zip/FileSaver.js"></script>
   <script type="text/javascript" src="js/functions.js"></script>
+  <script type="text/javascript" src="js/jsrsasign/jsrsasign-all-min.js"></script>
+  <script type="text/javascript" src="js/opentimestamps/opentimestamps.min.js"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -25,6 +27,8 @@
   <hr/>
   <form id="form-operation" onsubmit="return false"></form>
   <script type="text/javascript">
+
+    var _isRunningInFramework = window.process !== undefined;
 
     var _categories = {};
     var _zip = null;
