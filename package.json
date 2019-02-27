@@ -1,16 +1,16 @@
 {
-    "name": "distributed-hashed-operations",
-    "version": "1.0.0",
-    "description": "",
-    "main": "app.js",
-    "dependencies": {
-      "electron": "^4.0.5"
-    },
-    "devDependencies": {},
-    "scripts": {
-      "start": "electron ."
-    },
-    "keywords": [],
-    "author": "",
-    "license": "MIT"
+  "name": "distributed-hashed-operations",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "electron": "^4.0.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
 }
