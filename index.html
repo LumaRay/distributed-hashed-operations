@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Distributed Hash Based Operator's Workplace</title>
+  <script type="text/javascript" src="js/jel/jel.js"></script>
   <script type="text/javascript" src="js/zip/jszip.min.js"></script>
   <script type="text/javascript" src="js/zip/jszip-utils.js"></script>
   <script type="text/javascript" src="js/zip/FileSaver.js"></script>
@@ -11,40 +12,29 @@
   <script type="text/javascript" src="js/opentimestamps/opentimestamps.min.js"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <label for="operations">Operations:</label><br>
-  <select class="" name="" id="categories">
-    <option value="">Select category...</option>
-  </select>
-  <select class="" name="" id="subcategories">
-  </select>
-  <select class="" name="" id="operations">
-  </select>
-  <br/>
-  <label for="load-operation">Upload operation template: </label>
-  <input type="file" id="load-operation" multiple/>
-  <div id="load-operation-zone">Drag files here</div>
-  <hr/>
-  <form id="form-operation" onsubmit="return false"></form>
-  <script type="text/javascript">
-
-    var _isRunningInFramework = window.process !== undefined;
-
-    var _categories = {};
-    var _zip = null;
-
-    var _el_categories = document.getElementById('categories');
-    var _el_subcategories = document.getElementById('subcategories');
-    var _el_operations = document.getElementById('operations');
-    var _el_load_operation = document.getElementById('load-operation');
-    var _el_load_operation_zone = document.getElementById('load-operation-zone');
-    var _el_form = document.getElementById('form-operation');
-
-    // Load and parse operations list
-    document.addEventListener('DOMContentLoaded', function () {
-      loadjs('list.js', ParseOperationsList);
-    });
-    
-  </script>
-</body>
+<body><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() { jel([
+function() {
+  window._isRunningInFramework = window.process !== undefined;
+  window._categories = {};
+  window._zip = null;
+},
+{label:"Operations:"},
+{br:{}},
+{select:[
+  function(el){window._el_categories = el},
+  {option:"Select category..."}
+]},
+{select:function(el){window._el_subcategories = el}},
+{select:function(el){window._el_operations = el}},
+{br:{}},
+{label:"Upload operation template:"},
+{input:{type:"file",multiple:"",chi:function(el){window._el_load_operation = el}}},
+{div:{html:"Drag files here",chi:function(el){window._el_load_operation_zone = el}}},
+{hr:{}},
+{form:{onsubmit:"return false;",chi:function(el){window._el_form = el}}},
+function() {
+  // Load and parse operations list
+  loadjs('list.js', ParseOperationsList);
+}
+])});</script></body>
 </html>
