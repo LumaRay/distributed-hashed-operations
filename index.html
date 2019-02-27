@@ -13,34 +13,28 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() { jel([
-  function() {
-    window._isRunningInFramework = window.process !== undefined;
-    window._categories = {};
-    window._zip = null;
-  },
-  {label:{html:"Operations:"}},
-  {br:{}},
-  {select:[
-    {option:"Select category..."},
-    function(el){window._el_categories = el}
-  ]},
-  {select:function(el){window._el_subcategories = el}},
-  {select:function(el){window._el_operations = el}},
-  {br:{}},
-  {label:{html:"Upload operation template:"}},
-  {input:{type:"file",multiple:"",chi:[
-    function(el){window._el_load_operation = el}
-  ]}},
-  {div:{html:"Drag files here",chi:[
-    function(el){window._el_load_operation_zone = el}
-  ]}},
-  {hr:{}},
-  {form:{onsubmit:"return: false;",chi:[
-    function(el){window._el_form = el}
-  ]}},
-  function() {
-    // Load and parse operations list
-    loadjs('list.js', ParseOperationsList);
-  }
+function() {
+  window._isRunningInFramework = window.process !== undefined;
+  window._categories = {};
+  window._zip = null;
+},
+{label:"Operations:"},
+{br:{}},
+{select:[
+  function(el){window._el_categories = el},
+  {option:"Select category..."}
+]},
+{select:function(el){window._el_subcategories = el}},
+{select:function(el){window._el_operations = el}},
+{br:{}},
+{label:"Upload operation template:"},
+{input:{type:"file",multiple:"",chi:function(el){window._el_load_operation = el}}},
+{div:{html:"Drag files here",chi:function(el){window._el_load_operation_zone = el}}},
+{hr:{}},
+{form:{onsubmit:"return false;",chi:function(el){window._el_form = el}}},
+function() {
+  // Load and parse operations list
+  loadjs('list.js', ParseOperationsList);
+}
 ])});</script></body>
 </html>
