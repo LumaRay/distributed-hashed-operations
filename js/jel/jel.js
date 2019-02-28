@@ -1,7 +1,7 @@
 /* 
     jel: Javascript Elements
 	https://github.com/LumaRay/jel
-    Version: 0.2.4
+    Version: 0.2.5
     A vanilla javascript DOM elements creation and management helper library
     Created by: Yury Laykov / Russia, Zelenograd
     2019
@@ -39,7 +39,7 @@ jel.SetTemplate = function (strTemplateName, jelTemplate) {
         this._templates[strTemplateName] = jelTemplate;
         return this;
     } else
-        return undefined;
+        return null;
 }
 
 jel.GetTemplate = function (strTemplateName) {
@@ -50,7 +50,7 @@ HTMLElement.prototype.jel = function() {
 
     function jelSetStyle(el, oStyle) {
         if (Array.isArray(oStyle))
-        for (var o in oStyle)
+        for (var o = 0; o < oStyle.length; o++)
             jelSetStyle(el, oStyle[o]);
         else {
             if (typeof oStyle == "function")
@@ -71,31 +71,30 @@ HTMLElement.prototype.jel = function() {
     }
     
     function jelSetClass(el, oClass) {
-        var strClass = el.class;
-        if (strClass === null)
-            strClass = "";
         if (Array.isArray(oClass)) {
-            for (o in oClass)
-                jelSetClass(el, oClass[o]);
+        for (var o = 0; o < oClass.length; o++)
+            jelSetClass(el, oClass[o]);
         } else {
+            var strClass = el.getAttribute("class");
+            if (!strClass)
+                strClass = "";
             if (typeof oClass == "function")
                 strClass = strClass + " " + oClass.call(el, el, strClass.trim());
             else
                 strClass = strClass + " " + oClass;
+            el.setAttribute("class", strClass.trim());
         }
-
-        el.class = strClass.trim();
     }
     
     function jelAddHTML(el, strHTML) {
         if (!jel.settings.allowScripts && strHTML.search("<script") != -1)
-            return undefined;
+            return null;
         return el.appendChild(document.createRange().createContextualFragment(strHTML));
     }
     
     function jelAddArray(el, arr, appliedTemplatesAttr) {
         for (var rel in arr)
-        if (arr[rel].tagName !== undefined)
+        if (typeof arr[rel].tagName != "undefined")
             el.appendChild(arr[rel]);
         else if (typeof arr[rel] == "object")
             el.jel(arr[rel], {_appliedTemplates: appliedTemplatesAttr});
@@ -240,12 +239,14 @@ HTMLElement.prototype.jel = function() {
             }
             break;
         case "_appliedTemplates":
+        case jel.settings.mapKeywords.properties:
+        case jel.settings.mapKeywords.prop:
             break;
         default:
-            if (typeof attributes[a] == "string")
-                el.setAttribute(a, attributes[a]);
-            else if (typeof attributes[a] == "function")
+            if (typeof attributes[a] == "function")
                 el.setAttribute(a, attributes[a].call(el, el, el.getAttribute(a)));
+            else
+                el.setAttribute(a, attributes[a]);
         }
     }
     
@@ -288,12 +289,12 @@ HTMLElement.prototype.jel = function() {
         return;
 
     var appliedTemplatesAttr =  typeof arguments[arguments.length - 1] == "object" && 
-                                typeof arguments[arguments.length - 1]._appliedTemplates != "undefined" ? 
-                                jelSoftClone(arguments[arguments.length - 1]._appliedTemplates) : undefined;
+                                arguments[arguments.length - 1]._appliedTemplates ? 
+                                jelSoftClone(arguments[arguments.length - 1]._appliedTemplates) : null;
 
     if (typeof arguments[0] == "object" && Array.isArray(arguments[0])) {
         var arrEls = [];
-        for (var o in arguments[0]) {
+        for (var o = 0; o < arguments[0].length; o++) {
             var newArgs = jelSoftCloneArray(arguments);
             newArgs[0] = arguments[0][o];
             var newEl = this.jel.apply(this, newArgs);
@@ -304,8 +305,8 @@ HTMLElement.prototype.jel = function() {
     }
 
     if (typeof arguments[0] == "object") {
-        var tagName = undefined;
-        var attrs = undefined;
+        var tagName = null;
+        var attrs = null;
         for (var key in arguments[0]) {
             tagName = key;
             attrs = arguments[0][key];
@@ -332,13 +333,13 @@ HTMLElement.prototype.jel = function() {
         return jel._templates[arguments[0]].call(this, this, jelSoftCloneArray(arguments));
         
     if (!jel.settings.allowScripts && arguments[0].trim() == "script")
-        return undefined;
+        return null;
 
     var el = {};
 
     if  (typeof jel._templates[arguments[0]] == "object" && 
-        (typeof appliedTemplatesAttr == "undefined" || appliedTemplatesAttr[arguments[0]] !== true)) {
-        if (typeof appliedTemplatesAttr == "undefined")
+        (!appliedTemplatesAttr || !appliedTemplatesAttr[arguments[0]])) {
+        if (!appliedTemplatesAttr)
             appliedTemplatesAttr = {};
         appliedTemplatesAttr[arguments[0]] = true;
         var args = jelSoftCloneArray(arguments);
@@ -353,9 +354,11 @@ HTMLElement.prototype.jel = function() {
         // } else
 
         if (arguments[0] == "" && typeof arguments[1] == "string" &&
-           (arguments.length == 2 || arguments.length == 3 && typeof appliedTemplatesAttr != "undefined")) {
+           (arguments.length == 2 || 
+            arguments.length == 3 && typeof arguments[arguments.length - 1]._appliedTemplates != "undefined")
+        ) {
             jelAddHTML(this, arguments[1]);
-            return undefined;
+            return null;
         } else
             el = document.createElement(arguments[0]);
     }
@@ -368,13 +371,13 @@ HTMLElement.prototype.jel = function() {
     el.jelEx._topComponentRoot = el;
     el.jelEx.AddPropertyLink = jelAddPropertyLink;
 
-    if (this.jelEx !== undefined) {
+    if (typeof this.jelEx != "undefined") {
         el.jelEx._namedParentForChildren = this.jelEx._namedParentForChildren;
         el.jelEx._namedParent = this.jelEx._namedParentForChildren;
         el.jelEx._componentRoot = this.jelEx._componentRoot;
     }
 
-    if (el === undefined)
+    if (typeof el == "undefined")
         throw "Unknown error";
 
     for (var i = 1; i < arguments.length; i++)
@@ -417,7 +420,7 @@ HTMLElement.prototype.jel = function() {
         case "function":
             var res = arguments[i].call(el, el);
             if (res === false)
-                return undefined;
+                return null;
             if (res)
                 el.jel(res);
             break;
