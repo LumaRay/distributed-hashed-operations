@@ -251,7 +251,7 @@ function ConvertFormToObject() {
 
     _zip = new JSZip();
 
-    for (var e in _el_form.childNodes) {
+    for (var e = 0; e < _el_form.childNodes.length; e++) {
         var el = _el_form.childNodes[e];
         switch (el.localName) {
             case "label":
@@ -368,7 +368,30 @@ function _base64ToArrayBuffer(base64) {
     return bytes.buffer;
 }
 
-function GenerateTSA(digest) {
+function ReceivedTSAResponse(tsaName){
+    _usedTSA[tsaName] = true;
+    var fReceivedAll = true;
+    for (var t in _usedTSA)
+        fReceivedAll &= _usedTSA[t];
+    if (fReceivedAll) {
+        _zip.generateAsync({
+            type: "arraybuffer"
+        })
+        .then(function (content) {
+            var blobFinalZip = new Blob([new Uint8Array(content)]);
+            window.crypto.subtle.digest("SHA-256", content).then(
+                function (digest) {
+                    // console.log(buf2hex(digest));
+                    saveAs(blobFinalZip, "SHA2-256-" + buf2hex(digest) + ".zip");
+                },
+                function (error) {
+                    console.error("Error", error);
+                });
+        });
+    }
+}
+
+function GenerateTimeSignatures(digest) {
 
     //var testB64 = "MDkCAQEwMTANBglghkgBZQMEAgEFAAQgmDSHbc+wXLFnpcJJU+uljErImxrfV/KPL50JrxB+6PABAf8=";
 
@@ -391,9 +414,12 @@ function GenerateTSA(digest) {
 
     OpenTimestamps.stamp(detached).then( ()=>{
       const fileOts = detached.serializeToBytes();
-      console.log(fileOts);
-      saveAs(new Blob([fileOts]), "output.ots");
-      
+    //   console.log(fileOts);
+    //   saveAs(new Blob([fileOts]), "output.ots");
+      _zip.file("opentimestamps.org.ots", new Blob([fileOts]));
+      ReceivedTSAResponse("opentimestamps.org");
+
+      /*
         //Verify
         //const file = Buffer.from('5468697320646f63756d656e742069732074696d657374616d706564206f6e20626f7468204c697465636f696e20616e6420426974636f696e20626c6f636b636861696e73','hex');
         //const fileOts = Buffer.from('004f70656e54696d657374616d7073000050726f6f6600bf89e2e884e89294010832bb24ab386bef01c0656944ecafa2dbb1e4162ced385754419467f9fb6f4d97f010c7c118043ce37d45f1ab81d3cd9dc9aa08fff0109b01031328e457c754a860bc5bc567ab08f02012dbcf25d46d7f01c4bd7c7ebdcd2080974b83a9198bc63cdb23f69c817f110508f0203c6274f7a67007de279fb68938e5549f462043570ccdbc17ba43e632a772d43208f1045ab0daf9f008ad9722b721af69e80083dfe30d2ef90c8e292868747470733a2f2f66696e6e65792e63616c656e6461722e657465726e69747977616c6c2e636f6df010dfd289ba718b4f30bb78191936c762a508f02026503e60c641473ec6f833953d04f7c8a65c5059a44a7e8c01c8cb9fed2ac2b308f1045ab0dafaf008c0c7948d8d5b64cf0083dfe30d2ef90c8e232268747470733a2f2f6c74632e63616c656e6461722e636174616c6c6178792e636f6d','hex');
@@ -408,6 +434,7 @@ function GenerateTSA(digest) {
           //   litecoin: { timestamp: 1521540398, height: 1388467 } }
         
         });
+      */
     });
     
     
@@ -455,7 +482,9 @@ function GenerateTSA(digest) {
         if (xhr.status >= 200 && xhr.status <= 299) {
             //console.log(xhr.responseText);
             //alert(xhr.responseText);
-            saveAs(xhr.response, "output.tsr");
+            // saveAs(xhr.response, "output.tsr");
+            _zip.file("freetsa.org.tsr", xhr.response);
+            ReceivedTSAResponse("freetsa.org");
           // upload completed
         } else {
             alert(xhr.status);//404 "Not found"
@@ -475,6 +504,9 @@ function SaveOperationFormToZIP() {
 
     console.log(operationData);
 
+    _usedTSA = {};
+    _usedTSA["freetsa.org"] = false;
+    _usedTSA["opentimestamps.org"] = false;
     var operationJson = JSON.stringify(operationData, null, 2);
 
     _zip.file("operation.json", operationJson);
@@ -494,13 +526,15 @@ function SaveOperationFormToZIP() {
             type: "arraybuffer"
         })
         .then(function (content) {
-            var blob = new Blob([new Uint8Array(content)]);
+            var blobZippedOperation = new Blob([new Uint8Array(content)]);
             //saveAs(blob, operationData.name + ".zip");
             window.crypto.subtle.digest("SHA-256", content).then(
                 function (digest) {
-                    console.log(buf2hex(digest));
+                    _zip = new JSZip();
+                    _zip.file(buf2hex(digest)+".zip", blobZippedOperation);
+                    // console.log(buf2hex(digest));
 
-                    GenerateTSA(digest);
+                    GenerateTimeSignatures(digest);
                 },
                 function (error) {
                     console.error("Error", error);
