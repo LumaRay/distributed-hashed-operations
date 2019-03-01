@@ -44,10 +44,9 @@ function() {
 {select:[
   function(el){window._el_categories = el},
   {option:"Select category..."}
-]},
-{select:function(el){window._el_subcategories = el}},
-{select:function(el){window._el_operations = el}},
-{br:{}},
+]},{br:{}},
+{select:function(el){window._el_subcategories = el}},{br:{}},
+{select:function(el){window._el_operations = el}},{br:{}},
 {label:"Upload operation template:"},
 {input:{type:"file",multiple:"",chi:function(el){window._el_load_operation = el}}},
 {div:{html:"Drag files here",chi:function(el){window._el_load_operation_zone = el}}},
