@@ -591,6 +591,7 @@ function onLoadOperation(files) {
             JSZip.loadAsync(file).then(function (zip) {
                 // console.log(zip);
                 zip.forEach(function (relativePath, zipEntry) {
+                    var innerFileExt = zipEntry.name.split('.').pop();
                     if (zipEntry.name == "operation.json") {
                         // console.log(zipEntry);
                         zipEntry.async("string")
@@ -602,9 +603,34 @@ function onLoadOperation(files) {
                                 console.error("Error: ", e);
                             });
                     }
+                    if (innerFileExt === "zip") {
+                        zipEntry.async("blob")
+                        .then(function success(innerFile) {
+                            // console.log(text);
+                            JSZip.loadAsync(innerFile).then(function (zipInner) {
+                                zipInner.forEach(function (relativePathInner, zipEntryInner) {
+                                    if (zipEntryInner.name == "operation.json") {
+                                        // console.log(zipEntryInner);
+                                        zipEntryInner.async("string")
+                                            .then(function success(text) {
+                                                // console.log(text);
+                                                _operation = JSON.parse(text);
+                                                UpdateOperationForm(files.length == 1);
+                                            }, function error(e) {
+                                                console.error("Error: ", e);
+                                            });
+                                    }
+                                });
+                            }, function (e) {
+                                console.error("Error: ", e);
+                            });
+                        }, function error(e) {
+                            console.error("Error: ", e);
+                        });
+                    }
                 });
             }, function (e) {
-                // console.error("Ошибка: ", e);
+                console.error("Error: ", e);
             });
         } else if (fileExt === "js" || fileExt === "json") {
             // console.log(file);
