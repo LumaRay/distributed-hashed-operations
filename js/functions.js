@@ -382,7 +382,11 @@ function ReceivedTSAResponse(tsaName){
     }
     if (fReceivedAll) {
         _zip.generateAsync({
-            type: "arraybuffer"
+            type: "arraybuffer",
+            compression: "DEFLATE",
+            compressionOptions: {
+                level: 1
+            }
         })
         .then(function (content) {
             var blobFinalZip = new Blob([new Uint8Array(content)]);
@@ -546,7 +550,8 @@ function SaveOperationFormToZIP() {
     // });
 
     _zip.generateAsync({
-            type: "arraybuffer"
+            type: "arraybuffer",
+            compression: "STORE"
         })
         .then(function (content) {
             var blobZippedOperation = new Blob([new Uint8Array(content)]);
