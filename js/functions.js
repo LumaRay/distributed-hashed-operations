@@ -369,10 +369,17 @@ function _base64ToArrayBuffer(base64) {
 }
 
 function ReceivedTSAResponse(tsaName){
-    _usedTSA[tsaName] = true;
     var fReceivedAll = true;
-    for (var t in _usedTSA)
-        fReceivedAll &= _usedTSA[t];
+    if (window._el_timestamps.style.display == "block")
+    for (var t = 0; t < _usedTSA.length; t++) {
+        if (!_usedTSA[t].input.checked)
+            continue;
+        if (tsaName === _usedTSA[t].name) {
+            _usedTSA[t].replied = true;
+            _usedTSA[t].processingStyle.display = "none";
+        }
+        fReceivedAll = fReceivedAll && _usedTSA[t].replied;
+    }
     if (fReceivedAll) {
         _zip.generateAsync({
             type: "arraybuffer"
@@ -392,121 +399,137 @@ function ReceivedTSAResponse(tsaName){
 }
 
 function GenerateTimeSignatures(digest) {
+    var blobTsq = null;
+    if (window._el_timestamps.style.display == "block")
+    for (var t = 0; t < _usedTSA.length; t++) {
+        if (!_usedTSA[t].input.checked)
+            continue;
+        _usedTSA[t].processingStyle.display = "inline";
+        var tsaName = _usedTSA[t].name;
+        var tsaURL = _usedTSA[t].url;
+        // var tsa = _usedTSA[t];
+        _usedTSA[t].replied = false;
+        if (tsaName === "opentimestamps.org") {
+            //var testB64 = "MDkCAQEwMTANBglghkgBZQMEAgEFAAQgmDSHbc+wXLFnpcJJU+uljErImxrfV/KPL50JrxB+6PABAf8=";
+            //var testB64 = "MCECAQAwDzAHBgUrDgMCGgQEfwECAwYCKQECBH8BAgMBAf8=";
 
-    //var testB64 = "MDkCAQEwMTANBglghkgBZQMEAgEFAAQgmDSHbc+wXLFnpcJJU+uljErImxrfV/KPL50JrxB+6PABAf8=";
+            //<script type="text/javascript" src="js/pkijs/TSP_req_complex_example.js"></script>
+            //createTSPReq();
 
-    //var testB64 = "MCECAQAwDzAHBgUrDgMCGgQEfwECAwYCKQECBH8BAgMBAf8=";
-    
-    //<script type="text/javascript" src="js/pkijs/TSP_req_complex_example.js"></script>
-    //createTSPReq();
-    
-    
-    
-    
-    //<script type="text/javascript" src="js/opentimestamps/opentimestamps.min.js"></script>
-    //https://opentimestamps.org/docs/javascript-opentimestamps/
-    //const OpenTimestamps = require('javascript-opentimestamps');
-    //const file = Buffer.from('5468652074696d657374616d70206f6e20746869732066696c6520697320696e636f6d706c6574652c20616e642063616e2062652075706772616465642e0a','hex');
-    //const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), digest);//file);
-    var view   = new Int8Array(digest);
-    var array =  Array.prototype.slice.call(view);
-    const detached = OpenTimestamps.DetachedTimestampFile.fromHash(new OpenTimestamps.Ops.OpSHA256(), array);//file);
+            //<script type="text/javascript" src="js/opentimestamps/opentimestamps.min.js"></script>
+            //https://opentimestamps.org/docs/javascript-opentimestamps/
+            //const OpenTimestamps = require('javascript-opentimestamps');
+            //const file = Buffer.from('5468652074696d657374616d70206f6e20746869732066696c6520697320696e636f6d706c6574652c20616e642063616e2062652075706772616465642e0a','hex');
+            //const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), digest);//file);
+            var view   = new Int8Array(digest);
+            var array =  Array.prototype.slice.call(view);
+            const detached = OpenTimestamps.DetachedTimestampFile.fromHash(new OpenTimestamps.Ops.OpSHA256(), array);//file);
 
-    OpenTimestamps.stamp(detached).then( ()=>{
-      const fileOts = detached.serializeToBytes();
-    //   console.log(fileOts);
-    //   saveAs(new Blob([fileOts]), "output.ots");
-      _zip.file("opentimestamps.org.ots", new Blob([fileOts]));
-      ReceivedTSAResponse("opentimestamps.org");
+            OpenTimestamps.stamp(detached).then( ()=>{
+              const fileOts = detached.serializeToBytes();
+            //   console.log(fileOts);
+            //   saveAs(new Blob([fileOts]), "output.ots");
+              _zip.file("timestamps/opentimestamps.org.ots", new Blob([fileOts]));
+              ReceivedTSAResponse("opentimestamps.org");
 
-      /*
-        //Verify
-        //const file = Buffer.from('5468697320646f63756d656e742069732074696d657374616d706564206f6e20626f7468204c697465636f696e20616e6420426974636f696e20626c6f636b636861696e73','hex');
-        //const fileOts = Buffer.from('004f70656e54696d657374616d7073000050726f6f6600bf89e2e884e89294010832bb24ab386bef01c0656944ecafa2dbb1e4162ced385754419467f9fb6f4d97f010c7c118043ce37d45f1ab81d3cd9dc9aa08fff0109b01031328e457c754a860bc5bc567ab08f02012dbcf25d46d7f01c4bd7c7ebdcd2080974b83a9198bc63cdb23f69c817f110508f0203c6274f7a67007de279fb68938e5549f462043570ccdbc17ba43e632a772d43208f1045ab0daf9f008ad9722b721af69e80083dfe30d2ef90c8e292868747470733a2f2f66696e6e65792e63616c656e6461722e657465726e69747977616c6c2e636f6df010dfd289ba718b4f30bb78191936c762a508f02026503e60c641473ec6f833953d04f7c8a65c5059a44a7e8c01c8cb9fed2ac2b308f1045ab0dafaf008c0c7948d8d5b64cf0083dfe30d2ef90c8e232268747470733a2f2f6c74632e63616c656e6461722e636174616c6c6178792e636f6d','hex');
-        //const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), file);
-        const detached2 = OpenTimestamps.DetachedTimestampFile.fromHash(new OpenTimestamps.Ops.OpSHA256(), array);//file);
-        const detachedOts = OpenTimestamps.DetachedTimestampFile.deserialize(fileOts);
-        OpenTimestamps.verify(detachedOts,detached2).then(verifyResult => {
-          // return an object containing timestamp and height for every attestation if verified, undefined otherwise.
-          console.log(verifyResult);
-          // prints:
-          // { bitcoin: { timestamp: 1521545768, height: 514371 },
-          //   litecoin: { timestamp: 1521540398, height: 1388467 } }
-        
-        });
-      */
-    });
-    
-    
-    
+              /*
+                //Verify
+                //const file = Buffer.from('5468697320646f63756d656e742069732074696d657374616d706564206f6e20626f7468204c697465636f696e20616e6420426974636f696e20626c6f636b636861696e73','hex');
+                //const fileOts = Buffer.from('004f70656e54696d657374616d7073000050726f6f6600bf89e2e884e89294010832bb24ab386bef01c0656944ecafa2dbb1e4162ced385754419467f9fb6f4d97f010c7c118043ce37d45f1ab81d3cd9dc9aa08fff0109b01031328e457c754a860bc5bc567ab08f02012dbcf25d46d7f01c4bd7c7ebdcd2080974b83a9198bc63cdb23f69c817f110508f0203c6274f7a67007de279fb68938e5549f462043570ccdbc17ba43e632a772d43208f1045ab0daf9f008ad9722b721af69e80083dfe30d2ef90c8e292868747470733a2f2f66696e6e65792e63616c656e6461722e657465726e69747977616c6c2e636f6df010dfd289ba718b4f30bb78191936c762a508f02026503e60c641473ec6f833953d04f7c8a65c5059a44a7e8c01c8cb9fed2ac2b308f1045ab0dafaf008c0c7948d8d5b64cf0083dfe30d2ef90c8e232268747470733a2f2f6c74632e63616c656e6461722e636174616c6c6178792e636f6d','hex');
+                //const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), file);
+                const detached2 = OpenTimestamps.DetachedTimestampFile.fromHash(new OpenTimestamps.Ops.OpSHA256(), array);//file);
+                const detachedOts = OpenTimestamps.DetachedTimestampFile.deserialize(fileOts);
+                OpenTimestamps.verify(detachedOts,detached2).then(verifyResult => {
+                  // return an object containing timestamp and height for every attestation if verified, undefined otherwise.
+                  console.log(verifyResult);
+                  // prints:
+                  // { bitcoin: { timestamp: 1521545768, height: 514371 },
+                  //   litecoin: { timestamp: 1521540398, height: 1388467 } }
 
-    //<script type="text/javascript" src="js/jsrsasign/jsrsasign-all-min.js"></script>
-  var json = {
-    mi: { hashAlg: "sha256",
-          hashValue: "9834876dcfb05cb167a5c24953eba58c4ac89b1adf57f28f2f9d09af107ee8f0" }
-  };
-  //if (f1.policy1.value != "") 
-    //json.policy = {oid: f1.policy1.value};
-  //if (f1.nonce1.value != "")
-    //json.nonce = {hex: f1.nonce1.value};
-  //if (f1.certreq1.checked) {
-    json.certreq = true;
-  //} else {
-    //json.certreq = false;
-  //}
-
-    var o = new KJUR.asn1.tsp.TimeStampReq(json);
-    var hex = o.getEncodedHex();
-    var b64 = hex2b64(hex);
-    testB64 = b64;
-    //var pemBody = b64.replace(/(.{64})/g, "$1\r\n");
-    //pemBody = pemBody.replace(/\r\n$/, '');
-    //testB64 = pemBody;
-
-    digest = _base64ToArrayBuffer(testB64);
-
-
-    var xhr = new XMLHttpRequest();
-
-    xhr.onerror = function(e) {
-      console.log(e);
-    };
-    
-    xhr.upload.addEventListener('progress', function(e) {
-      //var { loaded, total } = e;
-      console.log(e.loaded +  "/" + e.total);
-    }, false);
-    
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === XMLHttpRequest.DONE) {
-        if (xhr.status >= 200 && xhr.status <= 299) {
-            //console.log(xhr.responseText);
-            //alert(xhr.responseText);
-            // saveAs(xhr.response, "output.tsr");
-            _zip.file("freetsa.org.tsr", xhr.response);
-            ReceivedTSAResponse("freetsa.org");
-          // upload completed
+                });
+              */
+            });
         } else {
-            alert(xhr.status);//404 "Not found"
+            if (!blobTsq) {
+                    //<script type="text/javascript" src="js/jsrsasign/jsrsasign-all-min.js"></script>
+                var json = {
+                    mi: {   hashAlg: "sha256",
+                            // hashValue: "9834876dcfb05cb167a5c24953eba58c4ac89b1adf57f28f2f9d09af107ee8f0"
+                            hashValue: buf2hex(digest) 
+                        }
+                };
+                //if (f1.policy1.value != "") 
+                    //json.policy = {oid: f1.policy1.value};
+                //if (f1.nonce1.value != "")
+                    //json.nonce = {hex: f1.nonce1.value};
+                //if (f1.certreq1.checked) {
+                    json.certreq = true;
+                //} else {
+                    //json.certreq = false;
+                //}
+
+                var o = new KJUR.asn1.tsp.TimeStampReq(json);
+                var hex = o.getEncodedHex();
+                var b64 = hex2b64(hex);
+                //var pemBody = b64.replace(/(.{64})/g, "$1\r\n");
+                //pemBody = pemBody.replace(/\r\n$/, '');
+                //testB64 = pemBody;
+
+                blobTsq = _base64ToArrayBuffer(b64);
+
+                _zip.file("timestamps/request.tsq", blobTsq);
+            }
+
+            var xhr = new XMLHttpRequest();
+
+            xhr.onerror = function(e) {
+              console.log(e);
+            };
+
+            xhr.upload.addEventListener('progress', function(e) {
+              //var { loaded, total } = e;
+              console.log(e.loaded +  "/" + e.total);
+            }, false);
+
+
+            xhr.localTsaName = tsaName;
+            xhr.onreadystatechange = function () {
+                if (this.readyState === XMLHttpRequest.DONE) {
+                    if (this.status >= 200 && this.status <= 299) {
+                        //console.log(xhr.responseText);
+                        //alert(xhr.responseText);
+                        // saveAs(xhr.response, "output.tsr");
+                        _zip.file("timestamps/" + this.localTsaName + ".tsr", this.response);
+                        ReceivedTSAResponse(this.localTsaName);
+                    // upload completed
+                    } else {
+                        alert(this.localTsaName + ": error " + this.status + ": " + this.statusText);//404 "Not found"
+                        ReceivedTSAResponse(this.localTsaName);
+                    }
+                }
+            };
+
+            // xhr.open('POST', 'http://timestamp.digicert.com/', true);
+            // xhr.open('POST', 'https://ca.signfiles.com/tsa/get.aspx', true);
+            // xhr.open('POST', 'https://freetsa.org/tsr', true);
+            xhr.open('POST', tsaURL, true);
+            xhr.setRequestHeader('Content-Type', 'application/timestamp-query');
+            xhr.responseType = 'blob';
+            xhr.send(blobTsq);
         }
-      }
-    };
-    //xhr.open('POST', 'http://timestamp.digicert.com/', true);
-    //xhr.open('POST', 'https://ca.signfiles.com/tsa/get.aspx', true);
-    xhr.open('POST', 'https://freetsa.org/tsr', true);
-    xhr.setRequestHeader('Content-Type', 'application/timestamp-query');
-    xhr.responseType = 'blob';
-    xhr.send(digest);
+    }
+    ReceivedTSAResponse("");
 }
+
 function SaveOperationFormToZIP() {
 
     var operationData = ConvertFormToObject();
 
     console.log(operationData);
 
-    _usedTSA = {};
-    _usedTSA["freetsa.org"] = false;
-    _usedTSA["opentimestamps.org"] = false;
+    // _usedTSA = [];
+    // _usedTSA.push({name:"freetsa.org",url:"https://freetsa.org/tsr",replied:false});
+    // _usedTSA.push({name:"opentimestamps.org",url:"",replied:false});
     var operationJson = JSON.stringify(operationData, null, 2);
 
     _zip.file("operation.json", operationJson);

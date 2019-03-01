@@ -17,7 +17,27 @@ function() {
   window._isRunningInFramework = window.process !== undefined;
   window._categories = {};
   window._zip = null;
-  window._usedTSA = [];
+  window._usedTSA = [
+    {name:"opentimestamps.org",url:"",replied:false},
+    {name:"swisssign.net",url:"http://tsa.swisssign.net",replied:false},// 5.9KB
+    {name:"wotrus.com",url:"http://tsa.wotrus.com/",replied:false},// 5.0KB
+    {name:"startssl.com",url:"http://tsa.startssl.com/rfc3161",replied:false},// 5.0KB
+    {name:"safestamper.com",url:"https://www.safestamper.com/tsa",replied:false},// 4.6KB
+    {name:"apple.com",url:"http://timestamp.apple.com/ts01 ",replied:false},// 4.1KB
+    {name:"digicert.com",url:"http://timestamp.digicert.com/",replied:false},// 3.6KB
+    {name:"symantec.com",url:"http://sha256timestamp.ws.symantec.com/sha256/timestamp",replied:false},// 3.5KB -
+    {name:"freetsa.org",url:"https://freetsa.org/tsr",replied:false,checked:true},// 3.2KB -
+    {name:"globalsign.com",url:"http://timestamp.globalsign.com",replied:false},// 3.1KB
+    {name:"globalsign.com - 2",url:"http://timestamp.globalsign.com/scripts/timstamp.dll",replied:false},// 3.0KB
+    {name:"certum.pl",url:"http://time.certum.pl",replied:false},// 2.2KB
+    {name:"dfn.de",url:"http://zeitstempel.dfn.de",replied:false},// 2.1KB -
+    {name:"comodoca.com",url:"http://timestamp.comodoca.com",replied:false},// 2.0KB -
+    {name:"signfiles.com",url:"https://ca.signfiles.com/tsa/get.aspx",replied:false},// 2.0KB -
+    {name:"signfiles.com - 2",url:"http://ca.signfiles.com/TSAServer.aspx",replied:false},// 1.5KB -
+    {name:"aloaha.com",url:"http://card.aloaha.com:8081/tsa.aspx",replied:false}// 1.7KB -
+    // {name:"cryptopro.ru",url:"http://www.cryptopro.ru/tsp/tsp.srf",replied:false},
+    // {name:"ascertia.com",url:"http://account.ascertia.com/adss/tsa",replied:false},
+  ];
 },
 {label:"Operations:"},
 {br:{}},
@@ -33,6 +53,28 @@ function() {
 {div:{html:"Drag files here",chi:function(el){window._el_load_operation_zone = el}}},
 {hr:{}},
 {form:{onsubmit:"return false;",chi:function(el){window._el_form = el}}},
+{input:{type:"checkbox",prop:{onchange:function(){_el_timestamps.style.display = this.checked ? "block" : "none"}}}},
+{"":"Add timestamp(s)"},
+{div:{style:{display:"none"},chi:function(el){
+  window._el_timestamps = el;
+  // var checkList = [];
+  // for (var t = 0; t < _usedTSA.length; t++) {
+  //   var TSA = _usedTSA[t];
+  //   checkList.push([
+  //     {input:{type:"checkbox",prop:{TSA:TSA},chi:function(el){el.TSA.input = el}}},
+  //     {"":TSA.name},
+  //     {br:{}}
+  //   ]);
+  // }
+  // return checkList;
+  for (var t = 0; t < _usedTSA.length; t++)
+    el.jel([
+      {input:{type:"checkbox",chi:function(el){_usedTSA[t].input = el; el.checked = _usedTSA[t].checked ? true : false}}},
+      {"":_usedTSA[t].name + " "},
+      {i:{style:{display:"none"},html:"[processing...]",chi:function(el){_usedTSA[t].processingStyle = el.style}}},
+      {br:{}}
+    ]);
+}}},
 function() {
   // Load and parse operations list
   loadjs('list.js', ParseOperationsList);

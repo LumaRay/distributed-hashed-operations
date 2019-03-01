@@ -1,7 +1,7 @@
 /* 
     jel: Javascript Elements
 	https://github.com/LumaRay/jel
-    Version: 0.2.5
+    Version: 0.2.6
     A vanilla javascript DOM elements creation and management helper library
     Created by: Yury Laykov / Russia, Zelenograd
     2019
@@ -421,8 +421,11 @@ HTMLElement.prototype.jel = function() {
             var res = arguments[i].call(el, el);
             if (res === false)
                 return null;
-            if (res)
-                el.jel(res);
+            if (res) {
+                // el.jel(res);
+                arguments[i] = res;
+                i = i - 1;
+            }
             break;
         default:
     }
