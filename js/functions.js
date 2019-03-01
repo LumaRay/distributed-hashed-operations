@@ -73,9 +73,8 @@ function RenderSubcategoriesList() {
     _el_subcategories.innerHTML = "";
     _el_operations.innerHTML = "";
     _el_form.innerHTML = "";
-    if (_el_categories.value === "") {
+    if (!_el_categories.value)
         return;
-    }
     var el_subcategory_option = document.createElement('option');
     // el_subcategory_option.text = "Выберите подкатегорию...";
     el_subcategory_option.text = "Select subcategory...";
@@ -94,9 +93,8 @@ function RenderSubcategoriesList() {
 function RenderOperationsList() {
     _el_operations.innerHTML = "";
     _el_form.innerHTML = "";
-    if (_el_subcategories.value === "") {
+    if (!_el_subcategories.value)
         return;
-    }
     var el_operation_option = document.createElement('option');
     // el_operation_option.text = "Выберите операцию...";
     el_operation_option.text = "Select operation...";
@@ -116,9 +114,8 @@ function RenderOperationsList() {
 function RenderOperationForm() {
     _el_form.innerHTML = "";
     var operation = GetCurrentOperation();
-    if (operation === undefined) {
+    if (!operation)
         return;
-    }
     for (var f in operation.fields) {
         var f_name = operation.fields[f].name;
         var f_title = operation.fields[f].title.en;
