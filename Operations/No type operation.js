@@ -37,6 +37,15 @@ _operation = {
 			"type": "textarea"
 		},
 		{
+			"name": "CustomJSON",
+			"title": {
+				"en": "Custom JSON object",
+				"ru": "Дополнительный объект JSON"
+			},
+			"type": "textarea",
+			"value": "{}"
+		},
+		{
 			"name": "Files",
 			"title": {
 				"en": "Files",
