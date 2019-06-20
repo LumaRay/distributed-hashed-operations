@@ -37,6 +37,22 @@ _operation = {
 			"type": "textarea"
 		},
 		{
+			"name": "Operator",
+			"author": {
+				"en": "Operator",
+				"ru": "Оператор"
+			},
+			"type": "text"
+		},
+		{
+			"name": "Empowerment",
+			"title": {
+				"en": "Empowerment",
+				"ru": "Полномочия"
+			},
+			"type": "text"
+		},
+		{
 			"name": "CustomJSON",
 			"title": {
 				"en": "Custom JSON object",
