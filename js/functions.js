@@ -266,6 +266,13 @@ function ConvertFormToObject() {
                     "ru": el.innerText
                 };
                 break;
+            case "span":
+                formItem = {};
+                formItem.description = {
+                    "en": el.innerText,
+                    "ru": el.innerText
+                };
+                break;
             case "input":
                 formItem.name = el.id;
                 switch (el.type) {
