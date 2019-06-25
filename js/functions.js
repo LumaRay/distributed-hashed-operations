@@ -119,12 +119,18 @@ function RenderOperationForm() {
     for (var f in operation.fields) {
         var f_name = operation.fields[f].name;
         var f_title = operation.fields[f].title.en;
+        var f_description = operation.fields[f].description.en;
         var f_type = operation.fields[f].type;
         var f_value = operation.fields[f].value !== undefined ? operation.fields[f].value : "";
         var f_attr = operation.fields[f].attributes;
         var el_label = document.createElement('label');
         el_label.innerText = f_title;
         _el_form.appendChild(el_label);
+        _el_form.appendChild(document.createElement('br'));
+        var el_span = document.createElement('span');
+        el_span.innerText = f_description;
+        el_span.style = "font-size: 12px; color: grey; font-family: sans-serif;";
+        _el_form.appendChild(el_span);
         _el_form.appendChild(document.createElement('br'));
         var el = null;
         if (f_type === "text") {
@@ -156,6 +162,7 @@ function RenderOperationForm() {
                 el.setAttribute(f_attr[a].name, f_attr[a].value);
             }
         }
+        _el_form.appendChild(document.createElement('br'));
         el.id = el.name = f_name;
     }
 
